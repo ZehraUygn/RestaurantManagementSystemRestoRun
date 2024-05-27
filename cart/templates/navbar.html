@@ -1,0 +1,109 @@
+<nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="#">RestoRun Menu</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'customer_menu' %}">Menu</a>
+            </li>
+            <a href="{% url 'cartsum' %}" class="btn btn-outline-dark">
+                <i class="bi-cart-fill me-1"></i> Cart
+                <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart_quantity">
+                    {% if cart %}
+                        {{ cart|length }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </span>
+            </a>
+        </ul>
+    </div>
+</nav>
+<style>
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.btn-update {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.container {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.menu-item {
+    margin-bottom: 20px;
+}
+
+.menu-item img {
+    max-width: 100%;
+    height: auto;
+}
+
+.menu-item .card-body {
+    padding: 1.25rem;
+}
+
+.menu-item .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.menu-item .card-text {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.btn-edit {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    color: #040404;
+}
+
+.navbar {
+    background-color: #f3be43;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.navbar-nav .nav-link {
+    color: #1d1d1d;
+    font-size: medium;
+    font-weight:bold ;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #007bff;
+}
+</style>

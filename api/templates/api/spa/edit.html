@@ -1,0 +1,145 @@
+  <!-- api\templates\api\spa\edit.html -->
+
+  {% load static %}
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Edit Menu Item</title>
+      <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+      <link rel="stylesheet" href="{% static 'api/spa/style.css' %}">
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+  
+  {% include 'api/spa/navbar.html' %}
+  
+  <div class="container mt-4 content" id="body" >
+      <h1 class="mb-4 text-center">Edit Menu Item</h1>
+      <form method="POST" action="{% url 'api:update' menu.id %}" enctype="multipart/form-data" class="p-4 shadow rounded bg-light">
+          {% csrf_token %}
+          <div class="form-group">
+              <label for="name">Name:</label>
+              {{ form.name }}
+          </div>
+          <div class="form-group">
+              <label for="image">Image:</label>
+              {{ form.image }}
+          </div>
+          <div class="form-group">
+              <label for="price">Price:</label>
+              {{ form.price }}
+          </div>
+          <div class="form-group">
+              <label for="ingredients">Ingredients:</label>
+              <div>
+                  {% for ingredient in ingredients %}
+                  <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="ingredient_{{ ingredient.id }}" name="ingredients" value="{{ ingredient.id }}"
+                      {% if ingredient in menu.ingredients.all %} checked {% endif %}>
+                      <label class="form-check-label" for="ingredient_{{ ingredient.id }}">{{ ingredient.name }}</label>
+                  </div>
+                  {% endfor %}
+              </div>
+          </div>
+          <div class="form-group">
+              <label for="category">Category:</label>
+              <select class="form-control" name="category" id="category">
+                  {% for category in categories %}
+                  <option value="{{ category.id }}" {% if category == menu.category %} selected {% endif %}>
+                      {{ category.name }}
+                  </option>
+                  {% endfor %}
+              </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Update Menu</button>
+      </form>
+  </div>
+  
+  </body>
+  </html>
+  
+<style>
+    body{
+        height: 1000px;
+        position: relative;
+        top: -20px;
+    }
+
+    #body{
+        font-size: smaller;
+    }
+    #content{
+        position: relative;
+        top: 100px;
+        font-size: small;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        font-weight: bold;
+    }
+    .btn-update {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
+    .container {
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+    .menu-item {
+        margin-bottom: 20px;
+    }
+    .menu-item img {
+        max-width: 100%;
+        height: auto;
+    }
+    .menu-item .card-body {
+        padding: 1.25rem;
+    }
+    .menu-item .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .menu-item .card-text {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+    .btn-edit {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+
+    }
+    .btn-delete {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: #fff;
+    }
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        color: #040404;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        font-weight: bold;
+    }
+    .btn-update {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
+
+    
+</style>

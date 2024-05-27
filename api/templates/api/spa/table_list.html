@@ -1,0 +1,110 @@
+<!-- api\templates\api\spa\table_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tables</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .table-card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 6px; 
+        }
+
+        .table-card {
+            flex: 0 1 calc(20% + 30px); 
+            height: 150px; 
+            margin-bottom: 15px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px; 
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); 
+            transition: box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+            left: -55px;
+        }
+
+        .table-card:hover {
+            box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
+        }
+
+        .table-available {
+            background-color: #28a745; 
+            color: white;
+        }
+
+        .table-occupied {
+            background-color: #dc3545; 
+            color: white;
+        }
+
+        .sidebar {
+            height: 100vh;
+            padding: 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+        }
+        #main {
+            position: relative;
+            top: 50px;
+        }
+        .mb-4{
+            text-align: center;
+            font-weight: bold;
+        }
+        #order{
+           position: relative;
+           left: -18px;
+        }
+        h2{
+            position: relative;
+            left: -60px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container mt-4 content">
+  <div class="row">
+    <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      {% include 'api/spa/navbar.html' %}
+    </nav>
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4" id="main">
+      {% block content %}
+      <h2 class="mb-4">TABLES</h2>
+      <div class="table-card-container">
+        {% for table in tables %}
+        <div class="table-card {% if table.status == 'available' %}table-available{% else %}table-occupied{% endif %}"
+             onclick="location.href='{% url 'api:table_detail' table.id %}';">
+            <div>
+                <strong>Table {{ table.table_number }}</strong>
+                <div>{{ table.get_status_display }}</div>
+                {% if table.status != 'available' %}
+                    <div>
+                        <ul>
+                        {% for order in table.order_set.all %}
+                           <div id ="order">{{ order.get_status_display }}</div>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+      </div>
+      {% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

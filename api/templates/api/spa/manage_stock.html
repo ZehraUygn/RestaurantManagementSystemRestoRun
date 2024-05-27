@@ -1,0 +1,260 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Stock</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'api/spa/style.css' %}">
+</head>
+<body>
+    {% include 'api/spa/navbar.html' %}
+    <div class="container mt-4 content">
+        <h1>Manage Stock</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ingredient Name</th>
+                    <th>Current Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient in ingredients %}
+                <tr>
+                    <td>{{ ingredient.name }}</td>
+                    <td id="quantity_{{ ingredient.id }}">
+                        {% if ingredient %}
+                            {{ ingredient.stock.quantity }}
+                        {% else %}
+                            No stock info
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" onclick="removeStock({{ ingredient.id }})">Remove Stock</button>
+                        <button class="btn btn-success" onclick="addStock({{ ingredient.id }})">Add Stock</button>
+                        <input type="number" id="manual_quantity_{{ ingredient.id }}" class="form-control" placeholder="Set stock" min="0" style="width: auto; display: inline-block;">
+                        <button class="btn btn-info" onclick="setStock({{ ingredient.id }})">Set</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+            
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+
+function updateStockQuantity(ingredientId) {
+    fetch(`/stock/${ingredientId}/`)
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json(); 
+    })
+    .then(data => {
+        document.getElementById(`quantity_${ingredientId}`).innerText = data.quantity;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const ingredientElements = document.querySelectorAll('[id^="quantity_"]');
+    ingredientElements.forEach(element => {
+        const ingredientId = element.id.split('_')[1];
+        updateStockQuantity(ingredientId);
+    });
+});
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayStock();
+        });
+
+        function displayStock() {
+            fetch('/stock-quantities/')
+            .then(response => response.json())
+            .then(data => {
+                for (const [ingredientId, quantity] of Object.entries(data)) {
+                    const quantityElement = document.getElementById(`quantity_${ingredientId}`);
+                    if (quantityElement) {
+                        quantityElement.innerText = quantity;
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateStockQuantity(ingredientId) {
+            fetch(`/stock/${ingredientId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(`quantity_${ingredientId}`).innerText = data.quantity;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const ingredients = document.querySelectorAll('.quantity');
+            ingredients.forEach(element => {
+                const ingredientId = element.id.split('_')[1];
+                updateStockQuantity(ingredientId);
+            });
+        });
+
+        function removeStock(ingredientId) {
+            fetch(`/remove-stock/${ingredientId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    const quantityElement = document.getElementById(`quantity_${ingredientId}`);
+                    if (quantityElement) {
+                        quantityElement.innerText = data.quantity;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update stock: ' + error.message);
+            });
+        }
+
+        function addStock(ingredientId) {
+            fetch(`/add-stock/${ingredientId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                const quantityElement = document.getElementById(`quantity_${data.ingredient_id}`);
+                if (quantityElement) {
+                    quantityElement.innerText = data.quantity;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to add stock: ' + error.message);
+            });
+        }
+
+        function setStock(ingredientId) {
+            const quantityInput = document.getElementById(`manual_quantity_${ingredientId}`);
+            const quantity = parseInt(quantityInput.value, 10);
+            if (isNaN(quantity)) {
+                alert('Please enter a valid number for quantity');
+                return;
+            }
+            fetch(`/set-stock/${ingredientId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'quantity': quantity})
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                document.getElementById(`quantity_${ingredientId}`).innerText = data.quantity;
+                quantityInput.value = ''; 
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to set stock: ' + error.message);
+            });
+        }
+
+
+    </script>
+</body>
+</html>
+<style>
+.table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+}
+
+.table th, .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-success {
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+</style>

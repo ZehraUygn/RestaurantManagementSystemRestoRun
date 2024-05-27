@@ -1,0 +1,249 @@
+
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu - Basket</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-
+T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="{% url 'api:create_order' %}">RestoRun</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <a href="{% url 'cartsum' %}" class="btn btn-outline-dark">
+                <i class="bi-cart-fill me-1"></i> Cart
+                <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart_quantity">
+                    {% if cart %}
+                        {{ cart|length }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </span>
+            </a>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Cart</h1>
+    <div class="row">
+        {% for item in cartitems %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card menu-item">
+                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <p class="card-text">{{ item.description }}</p>
+                    <p class="card-text">Price: ${{ item.price }}</p>
+                    <h6>Ingredients:</h6>
+                    <ul>
+                        {% for ingredient in item.ingredients.all %}
+                        <li>{{ ingredient }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="form-group row justify-content-center mt-3">
+                        <label class="col-md-3 col-form-label text-md-end">Quantity:</label>
+                        <div class="col-md-3">
+                            <span id="quantity{{ item.id }}">
+                                {{ quantities|get_item:item.id|default_if_none:"0" }}
+                            </span>
+                            
+                        </div>
+                    </div>
+                    <button type="button" data-index="{{ item.id }}" class="btn btn-danger delete-product">Remove</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+        <h3>Total Price: ${{ total_price }}</h3>
+        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+</div>
+
+
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script> 
+
+<script>
+$(document).ready(function() {
+    var totalQuantity = 0;
+    $('.menu-item').each(function() {
+        var itemId = $(this).find('.update-cart').data('index');
+        var itemQuantity = localStorage.getItem('menu_quantity_' + itemId);
+        if (itemQuantity) {
+            totalQuantity += parseInt(itemQuantity);
+            $('#select' + itemId).val(itemQuantity);
+        }
+    });
+    $('#cart_quantity').text(totalQuantity);
+});
+
+$(document).on('click', '.update-cart', function(e) {
+    e.preventDefault();
+
+    var menu_id = $(this).data('index');
+
+    $.ajax({
+        type: 'POST',
+        url: '{% url 'cartupdate' %}',
+        data: {
+            menu_id: menu_id,
+            menuqty: $('#select' + menu_id).val(),
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(json) {
+            localStorage.setItem('menu_quantity_' + menu_id, $('#select' + menu_id).val());
+            var totalQuantity = 0;
+            $('.menu-item').each(function() {
+                var itemId = $(this).find('.update-cart').data('index');
+                var itemQuantity = localStorage.getItem('menu_quantity_' + itemId);
+                if (itemQuantity) {
+                    totalQuantity += parseInt(itemQuantity);
+                }
+            });
+            $('#cart_quantity').text(totalQuantity);
+        },
+        error: function(xhr, errmsg, err) {
+        }
+    });
+});
+
+
+
+$(document).on('click', '.delete-product', function(e){
+    e.preventDefault();
+    $.ajax({
+    type: 'POST',
+    url: '{% url 'cartdelete' %}',
+    data: {
+      menu_id: $(this).data('index'),
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+      action: 'post'
+    },
+    success: function(json){
+        location.reload();
+    },
+
+    error: function(xhr, errmsg, err){
+
+    }
+
+
+    });
+
+})
+
+
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+</body>
+</html>
+
+<style>
+
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.btn-update {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.container {
+    background-color:  #ffc107;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+
+
+.menu-item {
+    margin-bottom: 20px;
+}
+
+.menu-item img {
+    max-width: 100%;
+    height: auto;
+}
+
+.menu-item .card-body {
+    padding: 1.25rem;
+}
+
+.menu-item .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.menu-item .card-text {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.btn-edit {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    color: #040404;
+}
+
+.navbar {
+    background-color: #f3be43;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.navbar-nav .nav-link {
+    color: #1d1d1d;
+    font-size: medium;
+    font-weight:bold ;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #007bff;
+}
+
+
+</style>

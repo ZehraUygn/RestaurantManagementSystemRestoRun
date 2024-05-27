@@ -1,0 +1,173 @@
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>RestoRun</h2>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:listeM' %}">
+                <i class="bi bi-menu-button-wide"></i> Menu
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:create' %}">
+                <i class="bi bi-plus-circle"></i> Add Menu Item
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:manage_stock' %}">
+                <i class="bi bi-box-seam"></i> Stock
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:add_category' %}">
+                <i class="bi bi-box-seam"></i> Add Category
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:add_ingredient' %}">
+                <i class="bi bi-box-seam"></i> Add Ingredient
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:view_orders' %}"><i class="bi bi-box-seam"></i>Sales Report</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:table_list' %}">
+                <i class="bi bi-box-seam"></i> Tables
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:manage_survey' %}">
+                <i class="bi bi-box-seam"></i> Manage Survey
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:view_responses' %}">
+                <i class="bi bi-box-seam"></i>Survey Responses
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'api:logout' %}">
+                <i class="bi bi-box-seam"></i> Logout
+            </a>
+        </li>
+
+    </ul>
+</div> 
+<div>
+
+
+</div>
+<style>
+
+body {
+        font-family: 'Arial', sans-serif;
+        margin-top: 0;
+        padding-top: 0;
+        background-color: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        top: -210px;
+        padding-top: 20px;
+    }
+
+.container.mt-4.content {
+        margin-top: 0;
+        width: 100%;
+        max-width: 960px; 
+        gap: 15px;
+        flex: 0 0 35%;
+        margin-bottom: 30px; 
+}
+
+
+
+.sidebar {
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background-color: #343a40;
+    padding: 0px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+    z-index: 1000;
+    
+ 
+}
+
+.sidebar-header {
+    color: #fff;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    background-color: rgb(179, 5, 5);
+    font-size: large;
+    height: 70px;
+
+}
+
+.sidebar-header h2 {
+    font-size: 1.5em;
+    margin-bottom: 0;
+    color: white;
+    font-weight: bold;
+    position: relative;
+    left: 30px;
+}
+
+.nav {
+    width: 100%;
+}
+
+.nav-item {
+    width: 100%;
+}
+
+.nav-link {
+    color: #ffffffc7;
+    font-size: 1.0em;
+    padding: 8px 15px;
+    transition: color 0.3s ease-in-out;
+}
+
+.nav-link i {
+    margin-right: 10px;
+    font-size: 1.2em;
+    vertical-align: middle;
+}
+
+.nav-link:hover, .nav-item.active .nav-link {
+    color: #fff;
+    background-color: #495057;
+}
+
+.content {
+    margin-left: 250px;
+    padding: 20px;
+}
+
+.content {
+    padding-top: 200px; 
+}
+
+
+@media screen and (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    .content, .container.mt-4 {
+        margin-left: 0;
+        padding-top: 0; 
+    }
+}
+
+@import url('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css');
+
+
+</style>

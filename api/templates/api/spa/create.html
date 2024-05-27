@@ -1,0 +1,130 @@
+<!-- api\templates\api\spa\create.html -->
+
+{% extends 'api/spa/menu.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Menu Item</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.btn-primary, .btn-success {
+    width: 100%; 
+}
+
+.btn-danger {
+    margin-top: 0.5rem; 
+}
+
+        
+    </style>
+</head>
+<body>
+  {% block content %}
+  <div class="container my-5">
+      <h1 class="mb-4">Add Menu Item</h1>
+      <form method="POST" action="{% url 'api:create' %}" enctype="multipart/form-data" id="menuForm">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="name" class="form-label">Name:</label>
+          <input type="text" class="form-control" id="name" name="name" value="{{ form.name.value|default_if_none:'' }}">
+        </div>
+        <div class="mb-3">
+          <label for="image" class="form-label">Image:</label>
+          <input type="file" class="form-control" id="image" name="image">
+        </div>
+        <div class="mb-3">
+          <label for="price" class="form-label">Price:</label>
+          <input type="text" class="form-control" id="price" name="price" value="{{ form.price.value|default_if_none:'' }}">
+        </div>
+        <div class="mb-3">
+          <label for="category" class="form-label">Category:</label>
+          <select class="form-select" id="category" name="category">
+            {% for category in form.category.field.queryset %}
+            <option value="{{ category.id }}" {% if category.id == form.category.value %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3" id="ingredientFields">
+          <label class="form-label">Ingredients:</label><br>
+          {% for ingredient in ingredients %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="ingredient_{{ ingredient.id }}" name="ingredients" value="{{ ingredient.id }}">
+              <label class="form-check-label" for="ingredient_{{ ingredient.id }}">
+                {{ ingredient.name }}
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mb-3" id="newIngredientField">
+          <label for="newIngredient" class="form-label">Add New Ingredient:</label>
+          <input type="text" class="form-control" id="newIngredient" name="newIngredient" placeholder="Enter new ingredient">
+          <button type="button" class="btn btn-primary mt-2" id="addIngredientBtn">Add New Ingredient</button>
+        </div>
+        <button type="submit" class="btn btn-success">Add Menu Item</button>
+      </form>
+  </div>
+  {% endblock %}
+</body>
+<script>
+
+    const addIngredientBtn = document.getElementById('addIngredientBtn');
+    const ingredientFields = document.getElementById('ingredientFields');
+    let ingredientCount = 0;
+
+    addIngredientBtn.addEventListener('click', function() {
+        const newIngredientField = document.createElement('div');
+        newIngredientField.classList.add('mb-3');
+        newIngredientField.innerHTML = `
+            <input type="text" class="form-control mb-2" name="ingredients_${ingredientCount}" placeholder="Ingredient name">
+            <button type="button" class="btn btn-danger" onclick="removeIngredientField(this)">Remove</button>
+        `;
+        ingredientFields.appendChild(newIngredientField);
+        ingredientCount++;
+    });
+
+    function removeIngredientField(button) {
+        button.parentElement.remove();
+    }
+</script>
+
+</body>
+</html>
+
+
+<script>
+    const addIngredientBtn = document.getElementById('addIngredientBtn');
+    const ingredientFields = document.getElementById('ingredientFields');
+  
+    let ingredientCount = 0;
+  
+    addIngredientBtn.addEventListener('click', function() {
+      const newIngredientField = document.createElement('div');
+      newIngredientField.classList.add('form-group');
+      newIngredientField.innerHTML = `
+        <input type="text" name="ingredients_${ingredientCount}" placeholder="Ingredient name">
+        <button type="button" class="btn btn-danger" onclick="removeIngredientField(this)">Remove</button>
+      `;
+      ingredientFields.appendChild(newIngredientField);
+      ingredientCount++;
+    });
+  
+    function removeIngredientField(button) {
+      button.parentElement.remove();
+    }
+  </script>
+  
+</html>

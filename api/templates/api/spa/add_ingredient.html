@@ -1,0 +1,90 @@
+<!-- In templates/api/add_ingredient.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Add Category</title>
+</head>
+<body>
+{% include 'api/spa/navbar.html' %}
+
+{% block content %}
+<div class="container mt-4 content" >
+  <h2>Add or Delete Ingredient</h2>
+  <form method="post" action="{% url 'api:add_ingredient' %}">
+    {% csrf_token %}
+    <div class="form-group mb-3">
+      <label for="name">Ingredient Name:</label>
+      <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <input type="hidden" name="ingredient_id" id="ingredient_id">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+
+  <h2 class="mt-5">Manage Ingredients</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ingredient in ingredients %}
+      <tr>
+        <td>{{ ingredient.name }}</td>
+        <td>
+          <a href="{% url 'api:delete_ingredient' ingredient.id %}" class="btn btn-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.edit-btn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        document.getElementById('name').value = this.dataset.name;
+        document.getElementById('quantity').value = this.dataset.quantity;
+        document.getElementById('ingredient_id').value = this.dataset.id;
+      });
+    });
+  });
+</script>
+{% endblock %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+<style>
+  body{
+    position: relative;
+    top: -60px;
+  }
+    .container {
+        padding-top: 50px; 
+    }
+    
+    .card {
+        background: #f7f7f7; 
+        border: 1px solid #e3e3e3;
+        border-radius: 15px; 
+    }
+    
+    .btn-primary {
+        background-color: #0056b3; 
+        border: none; 
+    }
+    
+    .btn-primary:hover {
+        background-color: #003d82; 
+    }
+</style>
+    

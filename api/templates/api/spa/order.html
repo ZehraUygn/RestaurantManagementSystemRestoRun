@@ -1,0 +1,215 @@
+<!-- api/templates/api/spa/order.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'api/spa/style.css' %}">
+
+
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="{% url 'api:create_order' %}">RestoRun</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <a href="{% url 'checkout' %}" class="btn btn-outline-dark">
+                    <i class="bi-cart-fill me-1"></i> Cart
+                </a>
+            </ul>
+        </div>
+    </nav>
+
+<div class="container mt-4 content">
+    {% block content %}
+    <h1 class="text-center mb-4">MENU</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link active" href="{% url 'api:create_order' %}">All</a>
+            {% for category in categories %}
+            <a class="nav-item nav-link" href="{% url 'api:create_order' %}?category={{ category.name }}">{{ category.name }}</a>
+            {% endfor %}
+        </div>
+    </nav>
+    <div class="row d-flex">
+        {% for item in menu %}
+        <div class="col-lg-4 col-md-6 menu-item">
+            <div class="card mb-4" >
+                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+                <div class="card-body d-flex flex-column" id ="index" >
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <p class="card-text">{{ item.description }}</p>
+                    <p class="card-text">Price: ${{ item.price }}</p>
+                    <h6>Ingredients:</h6>
+                    <ul>
+                        {% for ingredient in item.ingredients.all %}
+                        <li id="ingredients">{{ ingredient }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="row justify-content-center mt-3">
+                        <div  class="col-md-3 align-self-center text-md-end quantity-label" id="x">Quantity</div>
+                        <div class="col-md-3" id="quantity">
+                            <select class="form-select form-select-sm" id="select{{ item.id }}">
+                                {% for key, value in quantities.items %}
+                                    {% if key == item.id %}
+                                        <option value="{{ value }}" selected>{{ value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br/><br/>
+                    <button type="button" data-index="{{item.id}}" class="btn btn-secondary add-to-cart" >Add To Cart</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endblock %}
+    
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script>
+
+    $(document).ready(function() {
+        var totalQuantity = 0;
+        $('.menu-item').each(function() {
+            var itemId = $(this).find('.update-cart').data('index');
+            var itemQuantity = localStorage.getItem('menu_quantity_' + itemId);
+            if (itemQuantity) {
+                totalQuantity += parseInt(itemQuantity);
+                $('#select' + itemId).val(itemQuantity);
+            }
+        });
+        $('#cart_quantity').text(totalQuantity);
+    });
+
+
+
+    $(document).ready(function() {
+        $(document).on('click', '.add-to-cart', function(e){
+            e.preventDefault();
+            var menu_id = $(this).data('index');
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'cartadd' %}',
+                data: {
+                    menu_id: menu_id,
+                    menuqty: $('#select' + menu_id).val(),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    action: 'post'
+                },
+                success: function(json) {
+                    localStorage.setItem('menu_quantity_' + menu_id, $('#select' + menu_id).val());
+                    var totalQuantity = 0;
+                    $('.menu-item').each(function() {
+                        var itemId = $(this).find('.update-cart').data('index');
+                        var itemQuantity = localStorage.getItem('menu_quantity_' + itemId);
+                        if (itemQuantity) {
+                            totalQuantity += parseInt(itemQuantity);
+                        }
+                    });
+                    $('#cart_quantity').text(totalQuantity);
+                },
+                error: function(xhr, errmsg, err) {
+                }
+            });
+        });
+
+        $(document).on('change', '.form-select', function() {
+            var menu_id = $(this).attr('id').replace('select', '');
+            localStorage.setItem('menu_quantity_' + menu_id, $(this).val());
+        });
+
+        var totalQuantity = 0;
+        $('.menu-item').each(function() {
+            var itemId = $(this).find('.update-cart').data('index');
+            var itemQuantity = localStorage.getItem('menu_quantity_' + itemId);
+            if (itemQuantity) {
+                totalQuantity += parseInt(itemQuantity);
+                $('#select' + itemId).val(itemQuantity);
+            }
+        });
+
+        $('#cart_quantity').text(totalQuantity);
+    });
+</script>
+</body>
+</html>
+
+<style>
+.menu-item .card-img-top {
+        width: 100%; 
+        height: 200px; 
+        object-fit: cover;
+        border-radius: 0.25rem;
+}
+       /* styles.css */
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+
+
+.container {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.navbar {
+    background-color: #f3be43;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.navbar-brand{
+    color: white;
+}
+#x{
+    font-size: 13px;
+    position: relative;
+    top: -20px;
+    right: -35px;
+    font-weight: bold;
+}
+
+#quantity{
+    position: relative;
+    left: -50px;
+    top: 15px;
+}
+#index{
+    text-align: center;
+}
+
+h6{
+    font-weight: bold;
+}
+#ingredients{
+    position: relative;
+    left: -15px;
+}
+</style>
+    
